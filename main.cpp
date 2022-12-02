@@ -33,6 +33,7 @@ int main() {
             *s1,*s2;
     bool
             okay;
+
     // generate two key lists, one for each dictionary
     REPI(i,0,N_ITEMS) {
         REPI(j,0,8) {
@@ -55,8 +56,8 @@ int main() {
 
         d1[keys1[j]] = values1[j];
 
-        cout << "added [" << keys1[j] << "] = " << values1[j] << endl;
-        cout << "d1[" << keys1[j] << "] = " << d1[keys1[j]] << endl;
+       // cout << "added [" << keys1[j] << "] = " << values1[j] << endl;
+       // cout << "d1[" << keys1[j] << "] = " << d1[keys1[j]] << endl;
     }
     // add half of the values to d2
     s2 = new Sampler(N_ITEMS);
@@ -68,8 +69,8 @@ int main() {
 
         d2[keys2[j]] = values2[j];
 
-        cout << "added [" << keys2[j] << "] = " << values2[j] << endl;
-        cout << "d2[" << keys2[j] << "] = " << d2[keys2[j]] << endl;
+       // cout << "added [" << keys2[j] << "] = " << values2[j] << endl;
+       // cout << "d2[" << keys2[j] << "] = " << d2[keys2[j]] << endl;
     }
 
     // check that it worked

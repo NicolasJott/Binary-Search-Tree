@@ -29,20 +29,25 @@ public:
                 left[i] = i + 1;
             }
 
-            left[cap] = 0xffffffff;
+            left[capacity-1] = NULL_INDEX;
 
             freeListHead = 0;
 
         }
         nTrees++;
-        root = 0xffffffff;
+        root = NULL_INDEX;
 
     }
 
     ~BSTDictionary() {
         nTrees--;
         if (nTrees == 0) {
-            delete[] counts, heights, left, right, keys, values;
+            delete[] counts;
+            delete[] heights;
+            delete[] left;
+            delete[] right;
+            delete[] keys;
+            delete[] values;
         }
         else {
             prvClear(root);
@@ -67,7 +72,7 @@ public:
 
     bool isEmpty() { return root == NULL_INDEX; }
 
-    ValueType& search(const KeyType& key) {
+    ValueType & search(const KeyType& key) {
         uint32_t n = root;
         while (n != NULL_INDEX) {
             if (key == keys[n]) {
@@ -100,8 +105,11 @@ public:
     }
 
     void remove(const KeyType& key) {
+        uint32_t ntbd = NULL_INDEX;
+        root = prvRemove(root, ntbd, key);
 
-
+        if (ntbd != NULL_INDEX)
+            prvFree(ntbd);
     }
 
 private:
@@ -109,26 +117,28 @@ private:
     uint32_t root;                  // tree root
 
     static uint32_t                 // this is the shared data
-    * counts,                    // counts for each node
-    * heights,                   // heights for each node
-    * left,                      // left node indexes
-    * right,                     // right node indexes
+    *counts,                    // counts for each node
+    *heights,                   // heights for each node
+    *left,                      // left node indexes
+    *right,                     // right node indexes
     nTrees,                     // number of BSTs with this key and value type
     capacity,                   // size of the arrays
     freeListHead;               // the head of the unused node list (the free list)
 
+    static
     KeyType *keys;           // pool of keys
+    static
     ValueType *values;       // pool of values
 
     uint32_t prvAllocate() {
-        if (freeListHead == 3131961357) {
+        if (freeListHead == NULL_INDEX) {
             const uint32_t newCapacity = 2 * capacity;
-            auto *tmpCounts = new uint32_t[newCapacity];
-            auto *tmpHeights = new uint32_t[newCapacity];
-            auto *tmpLeft = new uint32_t[newCapacity];
-            auto *tmpRight = new uint32_t[newCapacity];
-            auto *tmpKeys = new KeyType[newCapacity];
-            auto *tmpValues = new ValueType[newCapacity];
+            auto tmpCounts = new uint32_t[newCapacity];
+            auto tmpHeights = new uint32_t[newCapacity];
+            auto tmpLeft = new uint32_t[newCapacity];
+            auto tmpRight = new uint32_t[newCapacity];
+            auto tmpKeys = new KeyType[newCapacity];
+            auto tmpValues = new ValueType[newCapacity];
 
 
             for (uint32_t i = 0; i < capacity; i++) {
@@ -140,7 +150,12 @@ private:
                 tmpValues[i] = values[i];
             }
 
-            delete[] counts, heights, left, right, keys, values;
+            delete[] counts;
+            delete[] heights;
+            delete[] left;
+            delete[] right;
+            delete[] keys;
+            delete[] values;
 
             // point shared pointers to temp arrays
                 counts = tmpCounts;
@@ -154,9 +169,11 @@ private:
             for (int i = capacity; i < newCapacity - 1; i++) {
                 left[i] = i + 1;
             }
-            left[newCapacity] = NULL_INDEX;
+            left[newCapacity-1] = NULL_INDEX;
 
             freeListHead = capacity;
+
+            capacity = newCapacity;
         }
 
         uint32_t tmp = freeListHead;
@@ -170,10 +187,9 @@ private:
         return tmp;
     }
 
-    void prvFree(uint32_t r) {                        // deallocating node
-        left[r] = freeListHead;
-
-        freeListHead = r;
+    void prvFree(uint32_t n) {                        // deallocating node
+        left[n] = freeListHead;
+        freeListHead = n;
     }
 
 
@@ -181,6 +197,7 @@ private:
         if (r != NULL_INDEX) {
             prvClear(left[r]);
             prvClear(right[r]);
+            prvFree(r);
         }
     }
 
@@ -218,7 +235,6 @@ private:
             throw std::domain_error("Remove: Key not found.");
         }
 
-
         if (key < keys[r]) {
             left[r] = prvRemove(left[r], ntbd, key);
         }
@@ -250,7 +266,6 @@ private:
 
                         keys[r] = keys[tmp];
                         values[r] = values[tmp];
-
                         right[r] = prvRemove(right[r], ntbd, key);
                     }
                     else {
@@ -293,3 +308,7 @@ template <typename KeyType, typename ValueType>
 uint32_t BSTDictionary<KeyType, ValueType>::capacity = 0;
 template <typename KeyType, typename ValueType>
 uint32_t BSTDictionary<KeyType, ValueType>::freeListHead = 0;
+template <typename KeyType, typename ValueType>
+KeyType *BSTDictionary<KeyType, ValueType>::keys = nullptr;
+template <typename KeyType, typename ValueType>
+ValueType *BSTDictionary<KeyType, ValueType>::values = nullptr;
