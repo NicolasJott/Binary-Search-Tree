@@ -14,38 +14,34 @@ template <typename KeyType, typename ValueType>
 class BSTDictionary {
 public:
 
-    void GenerateFreeList(uint32_t start, uint32_t end) {
-        for (uint32_t i = start; i <= end; i++) {
-            left[i] = (i + 1);
-        }
-        left[end] = NULL_INDEX;
-
-        freeListHead = start;
-    }
-
-    explicit BSTDictionary(uint32_t _cap = DEFAULT_INITIAL_CAPACITY) {
+    explicit BSTDictionary(uint32_t cap = DEFAULT_INITIAL_CAPACITY) {
         if (nTrees == 0) {
-            counts =  new uint32_t[_cap];
-            heights = new uint32_t[_cap];
-            left = new uint32_t[_cap];
-            right = new uint32_t[_cap];
-            keys = new KeyType[_cap];
-            values = new ValueType[_cap];
+            counts =  new uint32_t[cap];
+            heights = new uint32_t[cap];
+            left = new uint32_t[cap];
+            right = new uint32_t[cap];
+            keys = new KeyType[cap];
+            values = new ValueType[cap];
 
+            capacity = cap;
 
-            capacity = _cap;
+            for (int i = 0; i < cap - 1; i++) {
+                left[i] = i + 1;
+            }
 
-            GenerateFreeList(root, capacity);
+            left[cap] = 0xffffffff;
+
+            freeListHead = 0;
 
         }
         nTrees++;
-        root = NULL_INDEX;
+        root = 0xffffffff;
 
     }
 
     ~BSTDictionary() {
         nTrees--;
-        if (nTrees == 1) {
+        if (nTrees == 0) {
             delete[] counts, heights, left, right, keys, values;
         }
         else {
@@ -125,17 +121,17 @@ private:
     ValueType *values;       // pool of values
 
     uint32_t prvAllocate() {
-        if (freeListHead == NULL_INDEX) {
-            const uint32_t tmpCapacity = 2 * capacity;
-            uint32_t *tmpCounts = new uint32_t[tmpCapacity];
-            uint32_t *tmpHeights = new uint32_t[tmpCapacity];
-            uint32_t *tmpLeft = new uint32_t[tmpCapacity];
-            uint32_t *tmpRight = new uint32_t[tmpCapacity];
-            KeyType *tmpKeys = new KeyType[tmpCapacity];
-            ValueType *tmpValues = new ValueType[tmpCapacity];
+        if (freeListHead == 3131961357) {
+            const uint32_t newCapacity = 2 * capacity;
+            auto *tmpCounts = new uint32_t[newCapacity];
+            auto *tmpHeights = new uint32_t[newCapacity];
+            auto *tmpLeft = new uint32_t[newCapacity];
+            auto *tmpRight = new uint32_t[newCapacity];
+            auto *tmpKeys = new KeyType[newCapacity];
+            auto *tmpValues = new ValueType[newCapacity];
 
 
-            for (uint32_t i = 0; i <= capacity; i++) {
+            for (uint32_t i = 0; i < capacity; i++) {
                 tmpCounts[i] = counts[i];
                 tmpHeights[i] = heights[i];
                 tmpLeft[i] = left[i];
@@ -147,8 +143,20 @@ private:
             delete[] counts, heights, left, right, keys, values;
 
             // point shared pointers to temp arrays
+                counts = tmpCounts;
+                heights = tmpHeights;
+                left = tmpLeft;
+                right = tmpRight;
+                keys = tmpKeys;
+                values = tmpValues;
 
-            GenerateFreeList(root, tmpCapacity);
+
+            for (int i = capacity; i < newCapacity - 1; i++) {
+                left[i] = i + 1;
+            }
+            left[newCapacity] = NULL_INDEX;
+
+            freeListHead = capacity;
         }
 
         uint32_t tmp = freeListHead;
