@@ -264,10 +264,10 @@ private:
                             tmp = left[tmp];
                         }
 
-                        KeyType temp;
-                        temp = keys[tmp];
+                        KeyType tmpKeys;
+                        tmpKeys = keys[tmp];
                         keys[tmp] = keys[r];
-                        keys[r] = temp;
+                        keys[r] = tmpKeys;
 
                         ValueType tmpValues;
                         tmpValues = values[tmp];
