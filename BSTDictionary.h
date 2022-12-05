@@ -25,7 +25,7 @@ public:
 
             capacity = cap;
 
-            for (int i = 0; i < cap - 1; i++) {
+            for (size_t i = 0; i < cap - 1; i++) {
                 left[i] = i + 1;
             }
 
@@ -105,7 +105,7 @@ public:
     }
 
     void remove(const KeyType& key) {
-        uint32_t ntbd = NULL_INDEX;
+        uint32_t ntbd = search(key);
         root = prvRemove(root, ntbd, key);
 
         if (ntbd != NULL_INDEX)
@@ -166,7 +166,7 @@ private:
                 values = tmpValues;
 
 
-            for (int i = capacity; i < newCapacity - 1; i++) {
+            for (size_t i = capacity; i < newCapacity - 1; i++) {
                 left[i] = i + 1;
             }
             left[newCapacity-1] = NULL_INDEX;
@@ -264,8 +264,16 @@ private:
                             tmp = left[tmp];
                         }
 
-                        keys[r] = keys[tmp];
-                        values[r] = values[tmp];
+                        KeyType temp;
+                        temp = keys[tmp];
+                        keys[tmp] = keys[r];
+                        keys[r] = temp;
+
+                        ValueType tmpValues;
+                        tmpValues = values[tmp];
+                        values[tmp] = values[r];
+                        values[r] = tmpValues;
+
                         right[r] = prvRemove(right[r], ntbd, key);
                     }
                     else {
@@ -275,8 +283,15 @@ private:
                             tmp = right[tmp];
                         }
 
-                        keys[r] = keys[tmp];
-                        values[r] = values[tmp];
+                        KeyType temp;
+                        temp = keys[tmp];
+                        keys[tmp] = keys[r];
+                        keys[r] = temp;
+
+                        ValueType tmpValues;
+                        tmpValues = values[tmp];
+                        values[tmp] = values[r];
+                        values[r] = tmpValues;
 
                         left[r] = prvRemove(left[r], ntbd, key);
                     }
